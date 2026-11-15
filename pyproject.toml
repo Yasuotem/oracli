@@ -1,0 +1,26 @@
+[project]
+name = "oracli"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+authors = [
+    { name = "Yasuotem", email = "yso1969Tera@gmail.com" }
+]
+requires-python = ">=3.13"
+dependencies = [
+    "duckdb>=2.0.0",
+    "oracledb>=26.1.0",
+    "pyarrow>=26.0.1",
+    "pydantic>=2.14.3",
+    "pyyaml>=6.0.3",
+    "questionary>=2.1.1",
+    "sqlglot>=30.31.0",
+    "typer>=0.29.1",
+]
+
+[project.scripts]
+oracli = "oracli.cli:app"
+
+[build-system]
+requires = ["uv_build>=0.13.5,<0.14.0"]
+build-backend = "uv_build"
