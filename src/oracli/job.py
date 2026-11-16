@@ -1,7 +1,7 @@
 import logging
 from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, ClassVar, Literal
+from typing import Annotated, ClassVar
 
 import yaml
 from pydantic import BaseModel, ConfigDict, Field
@@ -27,14 +27,14 @@ class OutputKind(StrEnum):
 class Csv(BaseModel):
     model_config = ConfigDict(extra="forbid")
     SUFFIX: ClassVar[str] = ".csv"
-    type: Literal[OutputKind.csv]
+    type: OutputKind = OutputKind.csv
     encoding: Encoding = Encoding.cp932
 
 
 class Parquet(BaseModel):
     model_config = ConfigDict(extra="forbid")
     SUFFIX: ClassVar[str] = ".parquet"
-    type: Literal[OutputKind.parquet]
+    type: OutputKind = OutputKind.parquet
 
 
 class Step(BaseModel):

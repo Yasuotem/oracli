@@ -9,6 +9,7 @@ from pyarrow import csv, parquet
 
 from oracli.db import DbClient, DbError, get_db
 from oracli.job import Csv, Output, Parquet, Step, load_job
+from oracli.template_variables import get_filename_ctx
 
 log = logging.getLogger(__name__)
 
@@ -39,14 +40,7 @@ def do_steps(db: DbClient, steps: list[Step]):
     dt = datetime.now()
 
     for step in steps:
-        ctx = {
-            "step_name": step.name,
-            "datetime": dt.strftime("%Y%m%d_%H%M%S"),
-            "date": dt.strftime("%Y%m%d"),
-            "yyyy": dt.strftime("%Y"),
-            "mm": dt.strftime("%m"),
-            "dd": dt.strftime("%d"),
-        }
+        ctx = get_filename_ctx(step.name, dt)
 
         try:
             sql = step.load_sql()

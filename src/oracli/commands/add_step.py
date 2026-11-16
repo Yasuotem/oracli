@@ -39,9 +39,9 @@ def add_step(
 
     match out_type:
         case OutputKind.csv:
-            output = Csv(type=OutputKind.csv)
+            output = Csv()
         case OutputKind.parquet:
-            output = Parquet(type=OutputKind.parquet)
+            output = Parquet()
 
     step = Step(
         name=name,
