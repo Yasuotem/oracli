@@ -1,49 +1,20 @@
 import logging
-from enum import StrEnum
 from pathlib import Path
-from typing import Annotated, ClassVar
 
 import yaml
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict
 
 from oracli.db import DbKind
 
+from .output import OutputType
+
 log = logging.getLogger(__name__)
-
-
-class Encoding(StrEnum):
-    utf_8 = "utf-8"
-    cp932 = "cp932"
-
-
-type Output = Annotated[Csv | Parquet, Field(discriminator="type")]
-
-
-class OutputKind(StrEnum):
-    csv = "csv"
-    parquet = "parquet"
-
-
-class Csv(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    SUFFIX: ClassVar[str] = ".csv"
-    type: OutputKind = OutputKind.csv
-    encoding: Encoding = Encoding.cp932
-
-
-class Parquet(BaseModel):
-    model_config = ConfigDict(extra="forbid")
-    SUFFIX: ClassVar[str] = ".parquet"
-    type: OutputKind = OutputKind.parquet
-
 
 class Step(BaseModel):
     model_config = ConfigDict(extra="forbid")
     name: str
     sql: Path
-    output: Output
-    output_path: Path
-    file_name: str = "{step_name}_{date}"
+    output: OutputType
 
     def load_sql(self) -> str:
         with self.sql.open("r", encoding="utf-8") as f:
@@ -58,18 +29,16 @@ class Job(BaseModel):
     db: DbKind
     steps: list[Step]
 
+def save_job(job: Job, path: Path):
+    with path.open("w", encoding="utf-8") as f:
+        yamltext = yaml.safe_dump(
+            job.model_dump(mode="json"), allow_unicode=True, sort_keys=False
+        )
+        log.debug("yaml dump text: %s", yamltext)
+        f.write(yamltext)
 
 def load_job(path: Path) -> Job:
     log.debug("load job file %s", path)
     with path.open("r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
     return Job.model_validate(raw)
-
-
-def save_job(job: Job, path: Path):
-    with path.open("w") as f:
-        yamltext = yaml.safe_dump(
-            job.model_dump(mode="json"), allow_unicode=False, sort_keys=False
-        )
-        log.debug("yaml dump text: %s", yamltext)
-        f.write(yamltext)

@@ -3,12 +3,10 @@ from datetime import datetime
 from pathlib import Path
 from typing import Annotated
 
-import pyarrow
 import typer
-from pyarrow import csv, parquet
 
 from oracli.db import DbClient, DbError, get_db
-from oracli.job import Csv, Output, Parquet, Step, load_job
+from oracli.job import Step, load_job
 from oracli.template_variables import get_filename_ctx
 
 log = logging.getLogger(__name__)
@@ -54,20 +52,8 @@ def do_steps(db: DbClient, steps: list[Step]):
                 log.error(f"不明なテンプレート変数: {e}")
                 continue
 
-            do_output(tbl, step.output, path)
+            step.output.write(tbl, path)
 
         except (FileNotFoundError, DbError) as e:
             log.error(f"Step:{step.name} {e}")
             continue
-
-
-def do_output(tbl: pyarrow.Table, output: Output, path: Path):
-    """テーブルを出力する"""
-
-    match output:
-        case Csv(encoding=encoding):
-            options = csv.WriteOptions(encoding=encoding)
-            csv.write_csv(tbl, path, options)
-
-        case Parquet():
-            parquet.write_table(tbl, path)

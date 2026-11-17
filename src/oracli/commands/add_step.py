@@ -4,7 +4,8 @@ from typing import Annotated
 
 import typer
 
-from oracli.job import Csv, OutputKind, Parquet, Step, load_job, save_job
+from oracli.job import Step, load_job, save_job
+from oracli.output import Csv, OutputKind, Parquet
 from oracli.prompt import PathKind, prompt_enum, prompt_path, prompt_text
 
 log = logging.getLogger(__name__)
