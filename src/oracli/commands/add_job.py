@@ -17,11 +17,9 @@ def add_job(
         DbKind | None, typer.Option("--db", help="DBを指定 oracle | duckdb")
     ] = None,
 ):
-    if name is None:
-        name = prompt_text("新規作成するジョブ名を入力してください")
+    name = prompt_text(name, "新規作成するジョブ名を入力してください")
 
-    if db is None:
-        db = prompt_enum("使用するDBを選択してください", DbKind)
+    db = prompt_enum(db, "使用するDBを選択してください", DbKind)
 
     job = Job(name=name, db=db, steps=[])
     filepath = Path(f"{name}.yaml")

@@ -38,21 +38,19 @@ def do_steps(db: DbClient, steps: list[Step]):
     dt = datetime.now()
 
     for step in steps:
-        ctx = get_filename_ctx(step.name, dt)
 
         try:
             sql = step.load_sql()
 
             tbl = db.query(sql)
+
             try:
-                path = (step.output_path / step.file_name.format(**ctx)).with_suffix(
-                    step.output.SUFFIX
-                )
+                ctx = get_filename_ctx(step.name, dt)
             except KeyError as e:
                 log.error(f"不明なテンプレート変数: {e}")
                 continue
 
-            step.output.write(tbl, path)
+            step.output.write(tbl, ctx)
 
         except (FileNotFoundError, DbError) as e:
             log.error(f"Step:{step.name} {e}")

@@ -25,30 +25,26 @@ def add_step(
     ] = None,
 ):
     job = load_job(jobfile)
+    log.debug("Job: %s", job)
 
-    if name is None:
-        name = prompt_text("追加するステップ名を入力してください")
+    name = prompt_text(name, "追加するステップ名を入力してください")
 
-    if sql is None:
-        sql = prompt_path("Sqlファイルのファイルパスを指定してください", PathKind.file)
+    sql = prompt_path(sql, "Sqlファイルのファイルパスを指定してください", PathKind.file)
 
-    if out_type is None:
-        out_type = prompt_enum("出力するファイルの種類を指定してください", OutputKind)
+    out_type = prompt_enum(out_type, "出力するファイルの種類を指定してください", OutputKind)
 
-    if out_path is None:
-        out_path = prompt_path("出力先のパスを指定してください", PathKind.dir)
+    out_path = prompt_path(out_path, "出力先のパスを指定してください", PathKind.dir)
 
     match out_type:
         case OutputKind.csv:
-            output = Csv()
+            output = Csv(type=OutputKind.csv, path=out_path)
         case OutputKind.parquet:
-            output = Parquet()
+            output = Parquet(type=OutputKind.parquet, path=out_path)
 
     step = Step(
         name=name,
         sql=sql,
         output=output,
-        output_path=out_path,
     )
 
     job.steps.append(step)

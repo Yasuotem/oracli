@@ -37,4 +37,4 @@ def check(
             typer.echo(json.dumps(e.errors, indent=2, ensure_ascii=False))
             continue
 
-    typer.echo(f"{job.name}: check finished")
+    typer.echo(f"{job.name}: All check finished.")

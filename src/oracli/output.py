@@ -1,7 +1,8 @@
 
 import logging
 from enum import StrEnum
-from typing import Annotated, ClassVar
+from pathlib import Path
+from typing import Annotated, ClassVar, Literal
 
 import pyarrow as pa
 from pyarrow import csv, parquet
@@ -15,39 +16,52 @@ class Encoding(StrEnum):
     cp932 = "cp932"
 
 
-type Output = Annotated[Csv | Parquet, Field(discriminator="type")]
+type OutputType = Annotated[Csv | Parquet, Field(discriminator="type")]
 
 
 class OutputKind(StrEnum):
     csv = "csv"
     parquet = "parquet"
 
+
 class OutputError(Exception):
     """OutputError"""
 
 
-class Csv(BaseModel):
+class Output(BaseModel):
     model_config = ConfigDict(extra="forbid")
+
+    def prepare_path(self, path: Path):
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+
+class Csv(Output):
     SUFFIX: ClassVar[str] = ".csv"
     path: Path
     file_name: str = "{step_name}_{date}"
-    type: OutputKind = OutputKind.csv
+    type: Literal[OutputKind.csv]
     encoding: Encoding = Encoding.cp932
 
-    def write(self, tbl: pa.Table, path: Path):
-        options = csv.WriteOptions(encoding=self.encoding)
-        csv.write_csv(tbl, path, options)
+    def write(self, tbl: pa.Table, ctx: dict):
+        try:
+            file_path = (self.path / self.file_name.format(**ctx)).with_suffix(self.SUFFIX)
+            self.prepare_path(file_path)
+            options = csv.WriteOptions(encoding=self.encoding)
+            csv.write_csv(tbl, file_path, options)
+        except (OSError, pa.ArrowException) as e:
+            raise OutputError("OutputError") from e
 
 
-class Parquet(BaseModel):
-    model_config = ConfigDict(extra="forbid")
+class Parquet(Output):
     SUFFIX: ClassVar[str] = ".parquet"
     path: Path
-    type: OutputKind = OutputKind.parquet
+    type: Literal[OutputKind.parquet]
     file_name: str = "{step_name}_{date}"
 
-    def write(self, tbl: pa.Table, path: Path):
+    def write(self, tbl: pa.Table, ctx: dict):
         try:
-            parquet.write_table(tbl, path)
+            file_path = (self.path / self.file_name.format(**ctx)).with_suffix(self.SUFFIX)
+            self.prepare_path(file_path)
+            parquet.write_table(tbl, self.path)
         except (OSError, pa.ArrowException) as e:
            raise OutputError("OutputError") from e

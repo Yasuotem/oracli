@@ -29,6 +29,14 @@ class Job(BaseModel):
     db: DbKind
     steps: list[Step]
 
+
+def load_job(path: Path) -> Job:
+    log.debug("load job file %s", path)
+    with path.open("r", encoding="utf-8") as f:
+        raw = yaml.safe_load(f)
+    return Job.model_validate(raw)
+
+
 def save_job(job: Job, path: Path):
     with path.open("w", encoding="utf-8") as f:
         yamltext = yaml.safe_dump(
@@ -36,9 +44,3 @@ def save_job(job: Job, path: Path):
         )
         log.debug("yaml dump text: %s", yamltext)
         f.write(yamltext)
-
-def load_job(path: Path) -> Job:
-    log.debug("load job file %s", path)
-    with path.open("r", encoding="utf-8") as f:
-        raw = yaml.safe_load(f)
-    return Job.model_validate(raw)
