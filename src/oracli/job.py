@@ -1,14 +1,16 @@
 import logging
+from datetime import time
 from pathlib import Path
 
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from oracli.db import DbKind
+from oracli.types import DbKind
 
 from .output import OutputType
 
 log = logging.getLogger(__name__)
+
 
 class Step(BaseModel):
     model_config = ConfigDict(extra="forbid")
@@ -28,6 +30,7 @@ class Job(BaseModel):
     name: str
     db: DbKind
     steps: list[Step]
+    business_day_start: time
 
 
 def load_job(path: Path) -> Job:

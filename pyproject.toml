@@ -12,6 +12,7 @@ dependencies = [
     "oracledb>=26.1.0",
     "pyarrow>=26.0.1",
     "pydantic>=2.14.3",
+    "pydantic-settings>=2.16.3",
     "pyyaml>=6.0.3",
     "questionary>=2.1.1",
     "sqlglot>=30.31.0",

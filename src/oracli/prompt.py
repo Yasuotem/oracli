@@ -1,26 +1,25 @@
+import logging
 from collections.abc import Callable
+from datetime import time
 from enum import StrEnum
 from pathlib import Path
 
 import questionary
 
+from oracli.types import PathKind
 
-class PathKind(StrEnum):
-    file = "file"
-    dir = "dir"
-    csv_or_parquet = "csv_or_parquet"
-    sql = "sql"
-    yaml = "yaml"
-
+log = logging.getLogger(__name__)
 
 type PathValidator = Callable[[Path], bool]
 
 validators: dict[PathKind, PathValidator] = {
     PathKind.file: lambda x: Path(x).is_file(),
     PathKind.dir: lambda x: Path(x).is_dir(),
-    PathKind.csv_or_parquet: lambda x: Path(x).is_file() and Path(x).suffix in (".csv", ".parquet"),
+    PathKind.csv_or_parquet: lambda x: (
+        Path(x).is_file() and Path(x).suffix in (".csv", ".parquet")
+    ),
     PathKind.sql: lambda x: Path(x).is_file() and Path(x).suffix in (".sql"),
-    PathKind.yaml: lambda x: Path(x).is_file() and Path(x).suffix in (".yaml")
+    PathKind.yaml: lambda x: Path(x).is_file() and Path(x).suffix in (".yaml"),
 }
 
 
@@ -55,3 +54,20 @@ def prompt_text(value: str | None, msg: str) -> str:
 
     assert text is not None
     return text
+
+
+def prompt_time(value: time | None, msg: str) -> time:
+    def validator(value: str):
+        try:
+            time.fromisoformat(value)
+            return True
+        except ValueError:
+            return False
+
+    if value is not None:
+        return value
+
+    text = questionary.text(msg, validate=validator).ask()
+
+    assert text is not None
+    return time.fromisoformat(text)

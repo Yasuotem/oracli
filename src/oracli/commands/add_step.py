@@ -31,7 +31,9 @@ def add_step(
 
     sql = prompt_path(sql, "Sqlファイルのファイルパスを指定してください", PathKind.file)
 
-    out_type = prompt_enum(out_type, "出力するファイルの種類を指定してください", OutputKind)
+    out_type = prompt_enum(
+        out_type, "出力するファイルの種類を指定してください", OutputKind
+    )
 
     out_path = prompt_path(out_path, "出力先のパスを指定してください", PathKind.dir)
 

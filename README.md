@@ -1,0 +1,2 @@
+prompt_fileの内容を直す
+queryでencordingを指定するようにする

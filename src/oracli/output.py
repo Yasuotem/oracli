@@ -1,6 +1,5 @@
-
+import io
 import logging
-from enum import StrEnum
 from pathlib import Path
 from typing import Annotated, ClassVar, Literal
 
@@ -8,20 +7,12 @@ import pyarrow as pa
 from pyarrow import csv, parquet
 from pydantic import BaseModel, ConfigDict, Field
 
+from oracli.types import Encoding, OutputKind
+
 log = logging.getLogger(__name__)
 
 
-class Encoding(StrEnum):
-    utf_8 = "utf-8"
-    cp932 = "cp932"
-
-
 type OutputType = Annotated[Csv | Parquet, Field(discriminator="type")]
-
-
-class OutputKind(StrEnum):
-    csv = "csv"
-    parquet = "parquet"
 
 
 class OutputError(Exception):
@@ -44,10 +35,18 @@ class Csv(Output):
 
     def write(self, tbl: pa.Table, ctx: dict):
         try:
-            file_path = (self.path / self.file_name.format(**ctx)).with_suffix(self.SUFFIX)
+            file_path = (self.path / self.file_name.format(**ctx)).with_suffix(
+                self.SUFFIX
+            )
+
+            buf = io.BytesIO()
+            csv.write_csv(tbl, buf)
+
             self.prepare_path(file_path)
-            options = csv.WriteOptions(encoding=self.encoding)
-            csv.write_csv(tbl, file_path, options)
+
+            with file_path.open("w", encoding=self.encoding, newline="") as f:
+                f.write(buf.getvalue().decode("utf-8"))
+
         except (OSError, pa.ArrowException) as e:
             raise OutputError("OutputError") from e
 
@@ -60,8 +59,10 @@ class Parquet(Output):
 
     def write(self, tbl: pa.Table, ctx: dict):
         try:
-            file_path = (self.path / self.file_name.format(**ctx)).with_suffix(self.SUFFIX)
+            file_path = (self.path / self.file_name.format(**ctx)).with_suffix(
+                self.SUFFIX
+            )
             self.prepare_path(file_path)
-            parquet.write_table(tbl, self.path)
+            parquet.write_table(tbl, file_path)
         except (OSError, pa.ArrowException) as e:
-           raise OutputError("OutputError") from e
+            raise OutputError("OutputError") from e
