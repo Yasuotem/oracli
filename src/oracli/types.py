@@ -23,3 +23,10 @@ class PathKind(StrEnum):
     output = "output"
     sql = "sql"
     yaml = "yaml"
+
+
+class TextKind(StrEnum):
+    datetime = "datetime"
+    date = "date"
+    time = "time"
+    str = "str"

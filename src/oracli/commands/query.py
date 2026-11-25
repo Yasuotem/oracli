@@ -9,9 +9,9 @@ from oracli.commands.run import do_step
 from oracli.db import get_db
 from oracli.job import Step
 from oracli.output import Csv, Parquet
-from oracli.types import OutputKind, PathKind, EncodingKind
-from oracli.prompt import prompt_path, prompt_enum
+from oracli.prompt import prompt_enum, prompt_path
 from oracli.settings import Settings
+from oracli.types import EncodingKind, OutputKind, PathKind
 
 log = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ def query(
         EncodingKind | None, typer.Option(help="出力するcsvファイルのエンコードを指定")
     ] = None,
 ):
-    """DBを指定してクエリとファイル出力を行う"""
+    """SQLを実行してファイル出力を行う"""
 
     settings = Settings()
 
@@ -41,8 +41,12 @@ def query(
 
     match output.suffix:
         case ".csv":
-            encording = prompt_enum(encording, "csvファイルのエンコードを選択してください", EncodingKind)
-            out = Csv(path=output, file_name="", type=OutputKind.csv, encoding=encording)
+            encording = prompt_enum(
+                encording, "csvファイルのエンコードを選択してください", EncodingKind
+            )
+            out = Csv(
+                path=output, file_name="", type=OutputKind.csv, encoding=encording
+            )
         case ".parquet":
             out = Parquet(path=output, file_name="", type=OutputKind.parquet)
         case _:

@@ -34,6 +34,7 @@ class Job(BaseModel):
 
 
 def load_job(path: Path) -> Job:
+    """Jobファイルを読み込む"""
     log.debug("load job file %s", path)
     with path.open("r", encoding="utf-8") as f:
         raw = yaml.safe_load(f)
@@ -41,6 +42,7 @@ def load_job(path: Path) -> Job:
 
 
 def save_job(job: Job, path: Path):
+    """Jobファイルを保存する"""
     with path.open("w", encoding="utf-8") as f:
         yamltext = yaml.safe_dump(
             job.model_dump(mode="json"), allow_unicode=True, sort_keys=False
