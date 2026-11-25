@@ -1,3 +1,4 @@
+from oracli.types import EncodingKind
 import logging
 from pathlib import Path
 from typing import Annotated
@@ -13,15 +14,18 @@ log = logging.getLogger(__name__)
 
 def add_step(
     jobfile: Annotated[Path, typer.Argument(help="Jobファイルのファイルパス")],
-    name: Annotated[str | None, typer.Option("--name", help="Step名")] = None,
+    name: Annotated[str | None, typer.Option(help="Step名")] = None,
     sql: Annotated[
-        Path | None, typer.Option("--sql", help="Sqlファイルのファイルパス")
+        Path | None, typer.Option(help="Sqlファイルのファイルパス")
     ] = None,
     out_type: Annotated[
-        OutputKind | None, typer.Option("--out-type", help="出力するファイルの種類")
+        OutputKind | None, typer.Option(help="出力するファイルの種類")
     ] = None,
     out_path: Annotated[
-        Path | None, typer.Option("--out-path", help="出力先のパス")
+        Path | None, typer.Option(help="出力先のパス")
+    ] = None,
+    encording: Annotated[
+        EncodingKind | None, typer.Option(help="出力するcsvファイルのエンコードを指定")
     ] = None,
 ):
     job = load_job(jobfile)
@@ -29,17 +33,18 @@ def add_step(
 
     name = prompt_text(name, "追加するステップ名を入力してください")
 
-    sql = prompt_path(sql, "Sqlファイルのファイルパスを指定してください", PathKind.file)
+    sql = prompt_path(sql, "Sqlファイルのファイルパスを指定してください", PathKind.sql)
 
     out_type = prompt_enum(
         out_type, "出力するファイルの種類を指定してください", OutputKind
     )
 
-    out_path = prompt_path(out_path, "出力先のパスを指定してください", PathKind.dir)
+    out_path = prompt_path(out_path, "出力先のパスを指定してください", PathKind.path)
 
     match out_type:
         case OutputKind.csv:
-            output = Csv(type=OutputKind.csv, path=out_path)
+            encording = prompt_enum(encording, "csvファイルのエンコードを指定してください", EncodingKind)
+            output = Csv(type=OutputKind.csv, path=out_path, encoding=encording)
         case OutputKind.parquet:
             output = Parquet(type=OutputKind.parquet, path=out_path)
 

@@ -8,14 +8,21 @@ import sqlglot
 import typer
 
 from oracli.job import load_job
+from oracli.prompt import prompt_path
+from oracli.types import PathKind
 
 log = logging.getLogger(__name__)
 
 
 def check(
-    job_file: Annotated[Path, typer.Argument(help="Jobが記載されたyamlファイル")],
+    job_file: Annotated[
+        Path | None, typer.Argument(help="Jobが記載されたyamlファイル")
+    ] = None,
 ):
     """Jobファイルに登録されているSQLの構文チェックを行う"""
+
+    job_file = prompt_path(job_file, "Jobファイルを選択してください", PathKind.yaml)
+
     try:
         job = load_job(job_file)
     except pydantic.ValidationError as e:

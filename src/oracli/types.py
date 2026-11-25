@@ -6,7 +6,7 @@ class DbKind(StrEnum):
     duckdb = "duckdb"
 
 
-class Encoding(StrEnum):
+class EncodingKind(StrEnum):
     utf_8 = "utf-8"
     cp932 = "cp932"
 
@@ -19,6 +19,7 @@ class OutputKind(StrEnum):
 class PathKind(StrEnum):
     file = "file"
     dir = "dir"
-    csv_or_parquet = "csv_or_parquet"
+    path = "path"
+    output = "output"
     sql = "sql"
     yaml = "yaml"

@@ -7,7 +7,7 @@ import pyarrow as pa
 from pyarrow import csv, parquet
 from pydantic import BaseModel, ConfigDict, Field
 
-from oracli.types import Encoding, OutputKind
+from oracli.types import EncodingKind, OutputKind
 
 log = logging.getLogger(__name__)
 
@@ -31,7 +31,7 @@ class Csv(Output):
     path: Path
     file_name: str = "{step_name}_{date}"
     type: Literal[OutputKind.csv]
-    encoding: Encoding = Encoding.cp932
+    encoding: EncodingKind = EncodingKind.cp932
 
     def write(self, tbl: pa.Table, ctx: dict):
         try:

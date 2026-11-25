@@ -10,14 +10,14 @@ from oracli.types import PathKind
 
 log = logging.getLogger(__name__)
 
-type PathValidator = Callable[[Path], bool]
+type PathValidator = Callable[[str], bool]
+
 
 validators: dict[PathKind, PathValidator] = {
     PathKind.file: lambda x: Path(x).is_file(),
     PathKind.dir: lambda x: Path(x).is_dir(),
-    PathKind.csv_or_parquet: lambda x: (
-        Path(x).is_file() and Path(x).suffix in (".csv", ".parquet")
-    ),
+    PathKind.path: lambda x: Path(x).parent.exists(),
+    PathKind.output: lambda x: Path(x).parent.exists() and Path(x).suffix in (".csv", ".parquet"),
     PathKind.sql: lambda x: Path(x).is_file() and Path(x).suffix in (".sql"),
     PathKind.yaml: lambda x: Path(x).is_file() and Path(x).suffix in (".yaml"),
 }
@@ -25,7 +25,7 @@ validators: dict[PathKind, PathValidator] = {
 
 def prompt_path(value: Path | None, msg: str, kind: PathKind) -> Path:
     """valueがバリデーションに適合しない場合入力プロンプトを表示する"""
-    if value is not None and validators[kind](value):
+    if value is not None and validators[kind](str(value)):
         return value
 
     text = questionary.path(msg, validate=validators[kind]).ask()

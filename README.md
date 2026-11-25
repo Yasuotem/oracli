@@ -1,2 +1,2 @@
-prompt_fileの内容を直す
+prompt_fileの内容を直すcsv_parquetも
 queryでencordingを指定するようにする

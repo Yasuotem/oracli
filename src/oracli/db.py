@@ -1,6 +1,6 @@
 import logging
-from typing import Protocol, Self
 import re
+from typing import Protocol, Self
 
 import duckdb
 import oracledb
@@ -10,8 +10,8 @@ import sqlglot
 from oracli.settings import Settings
 from oracli.types import DbKind
 
-
 log = logging.getLogger(__name__)
+
 
 class DbError(Exception):
     """DBError"""
@@ -79,7 +79,9 @@ class Duckdb:
         try:
             duckdb_sql = sqlglot.transpile(sql, read="oracle", write="duckdb")
             log.debug("duckdbSQL: %s", duckdb_sql)
-            return self.conn.sql(duckdb_sql[0], params=get_sql_ctx(sql, ctx)).to_arrow_table()
+            return self.conn.sql(
+                duckdb_sql[0], params=get_sql_ctx(sql, ctx)
+            ).to_arrow_table()
         except (duckdb.Error, sqlglot.ParseError) as e:
             raise DbError("duckdb SQL execution failed") from e
 
