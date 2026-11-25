@@ -1,5 +1,4 @@
 import logging
-import re
 from typing import Protocol, Self
 
 import duckdb
@@ -18,7 +17,7 @@ class DbError(Exception):
 
 
 class DbClient(Protocol):
-    def query(self, sql: str, ctx: dict) -> pa.Table: ...
+    def query(self, sql: str, params: dict) -> pa.Table: ...
     def close(self) -> None: ...
     def __enter__(self) -> Self: ...
     def __exit__(self, exc_type, exc_value, traceback) -> None: ...
@@ -50,9 +49,9 @@ class Oracle:
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
 
-    def query(self, sql: str, ctx: dict) -> pa.Table:
+    def query(self, sql: str, params: dict) -> pa.Table:
         try:
-            return pa.table(self.conn.fetch_df_all(sql, get_sql_ctx(sql, ctx)))
+            return pa.table(self.conn.fetch_df_all(sql, params))
         except oracledb.Error as e:
             raise DbError("oralcedb SQL execution failed") from e
 
@@ -75,19 +74,10 @@ class Duckdb:
     def __exit__(self, exc_type, exc_value, traceback) -> None:
         self.close()
 
-    def query(self, sql: str, ctx: dict) -> pa.Table:
+    def query(self, sql: str, params: dict) -> pa.Table:
         try:
             duckdb_sql = sqlglot.transpile(sql, read="oracle", write="duckdb")
             log.debug("duckdbSQL: %s", duckdb_sql)
-            return self.conn.sql(
-                duckdb_sql[0], params=get_sql_ctx(sql, ctx)
-            ).to_arrow_table()
+            return self.conn.sql(duckdb_sql[0], params=params).to_arrow_table()
         except (duckdb.Error, sqlglot.ParseError) as e:
             raise DbError("duckdb SQL execution failed") from e
-
-
-def get_sql_ctx(sql: str, ctx: dict) -> dict:
-    names = set(re.findall(r"\:([A-Za-z_][A-Za-z0-9_]*)", sql))
-    params = {k: v for k, v in ctx.items() if k in names}
-    log.debug("params: %s", params)
-    return params

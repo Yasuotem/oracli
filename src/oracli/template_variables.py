@@ -1,4 +1,5 @@
 import logging
+import re
 from datetime import datetime, time, timedelta
 
 log = logging.getLogger(__name__)
@@ -48,3 +49,12 @@ def get_sql_ctx(dt: datetime, business_day_start: time) -> dict:
         "month_from": month_from,
         "month_to": month_to,
     }
+
+
+def extract_sql_params(sql: str, ctx: dict) -> tuple[dict, list[str]]:
+    names = set(re.findall(r"\:([A-Za-z_][A-Za-z0-9_]*)", sql))
+    keys = ctx.keys() & names
+    rest = names - keys
+    params = {key: ctx[key] for key in keys}
+    log.debug("params: %s", params)
+    return params, list(rest)

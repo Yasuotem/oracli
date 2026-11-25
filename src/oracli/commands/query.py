@@ -5,13 +5,13 @@ from typing import Annotated
 
 import typer
 
-from oracli.commands.run import do_step
 from oracli.db import get_db
 from oracli.job import Step
 from oracli.output import Csv, Parquet
-from oracli.prompt import prompt_enum, prompt_path
+from oracli.prompt import prompt_enum, prompt_path, prompt_text
 from oracli.settings import Settings
-from oracli.types import EncodingKind, OutputKind, PathKind
+from oracli.template_variables import extract_sql_params, get_filename_ctx, get_sql_ctx
+from oracli.types import EncodingKind, OutputKind, PathKind, TextKind
 
 log = logging.getLogger(__name__)
 
@@ -55,4 +55,19 @@ def query(
     step = Step(name="", sql=sql, output=out)
 
     with get_db(settings) as db:
-        do_step(db, step, dt, start)
+        sql_text = step.load_sql()
+        sql_ctx = get_sql_ctx(dt, start)
+
+        params, rest = extract_sql_params(sql_text, sql_ctx)
+        log.debug("params: %s keys: %s", params, rest)
+
+        for key in rest:
+            typer.echo(f"SQLのバインド変数{key}が未定義です")
+            param_type = prompt_enum(None, f"{key}のTypeを選択してください", TextKind)
+            params[key] = prompt_text(None, f"{key}の値を入力してください", param_type)
+
+        filename_ctx = get_filename_ctx(step.name, dt)
+
+        tbl = db.query(sql_text, params)
+
+        step.output.write(tbl, filename_ctx)
