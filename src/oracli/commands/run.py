@@ -40,6 +40,9 @@ def run(
                 dt = datetime.now()
             log.debug("dt: %s", dt)
 
+            success_count = 0
+            failure_count = 0
+
             for step in job.steps:
                 log.info("Executing Step: %s", step.name)
                 try:
@@ -47,7 +50,8 @@ def run(
                     sql_ctx = get_sql_ctx(dt, job.business_day_start)
 
                     params, rest = extract_sql_params(sql, sql_ctx)
-                    log.debug("params: %s keys: %s", params, rest)
+                    if rest == {}:
+                        raise KeyError(f"{step.sql} params is undefined: {rest}")
 
                     filename_ctx = get_filename_ctx(step.name, dt)
 
@@ -55,12 +59,22 @@ def run(
 
                     step.output.write(tbl, filename_ctx)
 
+                    success_count += 1
+
                 except (FileNotFoundError, DbError, KeyError) as e:
                     log.error(f"Step [{step.name}] execution failed:  {e}")
+                    failure_count += 1
                     continue
 
     except Exception:
         log.exception("Job execution failed", extra={"job": job.name})
         raise typer.Exit(1)
 
-    log.info("Job: %s finished", job.name)
+    log.info(
+        "Job finished",
+        extra={
+            "job": job.name,
+            "succeeded_steps": success_count,
+            "failed_steps": failure_count,
+        },
+    )

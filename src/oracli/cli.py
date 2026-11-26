@@ -2,8 +2,8 @@ from typing import Annotated
 
 import typer
 
-from .commands import add_job, add_step, check, query, run
-from .logging_config import config_logging
+from oracli.commands import add_job, add_step, check, query, run
+from oracli.logging_config import config_logging
 
 app = typer.Typer()
 

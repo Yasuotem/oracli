@@ -50,6 +50,7 @@ class Oracle:
         self.close()
 
     def query(self, sql: str, params: dict) -> pa.Table:
+        """sqlを実行してarrow tableを返す"""
         try:
             return pa.table(self.conn.fetch_df_all(sql, params))
         except oracledb.Error as e:
@@ -75,6 +76,7 @@ class Duckdb:
         self.close()
 
     def query(self, sql: str, params: dict) -> pa.Table:
+        """sqlをduckdbのsqlに変換して実行してarrow tableを返す"""
         try:
             duckdb_sql = sqlglot.transpile(sql, read="oracle", write="duckdb")
             log.debug("duckdbSQL: %s", duckdb_sql)

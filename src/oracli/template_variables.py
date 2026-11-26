@@ -52,9 +52,10 @@ def get_sql_ctx(dt: datetime, business_day_start: time) -> dict:
 
 
 def extract_sql_params(sql: str, ctx: dict) -> tuple[dict, list[str]]:
+    """sqlのバインド変数とパラメータを照合して適合するパラメータと未定義の変数のリストを返す"""
     names = set(re.findall(r"\:([A-Za-z_][A-Za-z0-9_]*)", sql))
     keys = ctx.keys() & names
     rest = names - keys
     params = {key: ctx[key] for key in keys}
-    log.debug("params: %s", params)
+    log.debug("params: %s, rest: %s", params, rest)
     return params, list(rest)

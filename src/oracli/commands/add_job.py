@@ -5,9 +5,8 @@ from typing import Annotated
 
 import typer
 
-from oracli.db import DbKind
 from oracli.job import Job, save_job
-from oracli.prompt import prompt_enum, prompt_text
+from oracli.prompt import prompt_text
 from oracli.types import TextKind
 
 log = logging.getLogger(__name__)
@@ -15,9 +14,6 @@ log = logging.getLogger(__name__)
 
 def add_job(
     name: Annotated[str | None, typer.Argument(help="Job名")] = None,
-    db: Annotated[
-        DbKind | None, typer.Option("--db", help="DBを指定 oracle | duckdb")
-    ] = None,
     start: Annotated[
         time | None, typer.Option(help="作業日の開始時間を指定する")
     ] = None,
@@ -25,11 +21,9 @@ def add_job(
     """新規Jobファイルを作成"""
     name = prompt_text(name, "新規作成するジョブ名を入力してください", TextKind.str)
 
-    db = prompt_enum(db, "使用するDBを選択してください", DbKind)
-
     start = prompt_text(start, "作業日の開始時間を入力してください", TextKind.time)
 
-    job = Job(name=name, db=db, steps=[], business_day_start=start)
+    job = Job(name=name, steps=[], business_day_start=start)
     filepath = Path(f"{name}.yaml")
 
     save_job(job, filepath)

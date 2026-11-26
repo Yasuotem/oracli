@@ -12,5 +12,8 @@ wheels/
 # ruff
 .ruff_cache
 
+# pyinstaller
+.spec
+
 *.log
 *.yaml

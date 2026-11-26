@@ -20,6 +20,9 @@ class OutputError(Exception):
 
 
 class Output(BaseModel):
+    """ジョブステップ内での出力情報の定義
+    出力先パスの作成とファイル出力を担当する"""
+
     model_config = ConfigDict(extra="forbid")
 
     def prepare_path(self, path: Path):
@@ -34,6 +37,7 @@ class Csv(Output):
     encoding: EncodingKind = EncodingKind.cp932
 
     def write(self, tbl: pa.Table, ctx: dict):
+        """csvファイルを出力する"""
         try:
             file_path = (self.path / self.file_name.format(**ctx)).with_suffix(
                 self.SUFFIX
@@ -58,6 +62,7 @@ class Parquet(Output):
     file_name: str = "{step_name}_{date}"
 
     def write(self, tbl: pa.Table, ctx: dict):
+        """parquetファイルを出力する"""
         try:
             file_path = (self.path / self.file_name.format(**ctx)).with_suffix(
                 self.SUFFIX

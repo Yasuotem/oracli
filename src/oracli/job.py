@@ -5,14 +5,15 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from oracli.types import DbKind
-
 from .output import OutputType
 
 log = logging.getLogger(__name__)
 
 
 class Step(BaseModel):
+    """SQLを実行するジョブステップの定義
+    SQLファイルの読み込みを担当する"""
+
     model_config = ConfigDict(extra="forbid")
     name: str
     sql: Path
@@ -26,9 +27,10 @@ class Step(BaseModel):
 
 
 class Job(BaseModel):
+    """ジョブの定義"""
+
     model_config = ConfigDict(extra="forbid")
     name: str
-    db: DbKind
     steps: list[Step]
     business_day_start: time
 

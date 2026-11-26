@@ -62,7 +62,7 @@ def query(
         log.debug("params: %s keys: %s", params, rest)
 
         for key in rest:
-            typer.echo(f"SQLのバインド変数{key}が未定義です")
+            typer.echo(f"{sql}のバインド変数{key}が未定義です")
             param_type = prompt_enum(None, f"{key}のTypeを選択してください", TextKind)
             params[key] = prompt_text(None, f"{key}の値を入力してください", param_type)
 
