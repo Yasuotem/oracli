@@ -21,7 +21,7 @@ exe = EXE(
     a.scripts,
     [],
     exclude_binaries=True,
-    name='cli',
+    name='oracli',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,

@@ -5,7 +5,7 @@ from pathlib import Path
 import yaml
 from pydantic import BaseModel, ConfigDict
 
-from .output import OutputType
+from oracli.output import OutputType
 
 log = logging.getLogger(__name__)
 
